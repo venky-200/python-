@@ -1,0 +1,47 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+import json
+
+def scrape_website(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    return soup
+
+def extract_data(soup):
+    # Modify this function according to the structure of the website you're scraping
+    data = []
+    # Example: Extracting titles and links from a list of articles
+    articles = soup.find_all('article')
+    for article in articles:
+        title = article.find('h2').text.strip()
+        link = article.find('a')['href']
+        data.append({'Title': title, 'Link': link})
+    return data
+
+def save_to_csv(data, filename):
+    with open(filename, 'w', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=data[0].keys())
+        writer.writeheader()
+        writer.writerows(data)
+
+def save_to_json(data, filename):
+    with open(filename, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+
+def main():
+    url = input("Enter the URL of the website you want to scrape: ")
+    filename_csv = input("Enter the name of the CSV file to save data to (e.g., data.csv): ")
+    filename_json = input("Enter the name of the JSON file to save data to (e.g., data.json): ")
+
+    soup = scrape_website(url)
+    data = extract_data(soup)
+
+    save_to_csv(data, filename_csv)
+    print(f"Data saved to {filename_csv}")
+
+    save_to_json(data, filename_json)
+    print(f"Data saved to {filename_json}")
+
+if __name__ == "__main__":
+    main()
