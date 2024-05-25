@@ -1,0 +1,65 @@
+import requests
+from datetime import datetime
+
+def get_weather(api_key, city):
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    response = requests.get(url)
+    data = response.json()
+    return data
+
+def get_forecast(api_key, city):
+    url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
+    response = requests.get(url)
+    data = response.json()
+    return data
+
+def display_weather(data):
+    if data["cod"] != "404":
+        city = data["name"]
+        country = data["sys"]["country"]
+        weather_desc = data["weather"][0]["description"]
+        temperature = data["main"]["temp"]
+        feels_like = data["main"]["feels_like"]
+        humidity = data["main"]["humidity"]
+        wind_speed = data["wind"]["speed"]
+        sunrise = datetime.fromtimestamp(data["sys"]["sunrise"]).strftime('%Y-%m-%d %H:%M:%S')
+        sunset = datetime.fromtimestamp(data["sys"]["sunset"]).strftime('%Y-%m-%d %H:%M:%S')
+
+        print(f"Weather in {city}, {country}:")
+        print(f"Description: {weather_desc}")
+        print(f"Temperature: {temperature}°C")
+        print(f"Feels like: {feels_like}°C")
+        print(f"Humidity: {humidity}%")
+        print(f"Wind Speed: {wind_speed} m/s")
+        print(f"Sunrise: {sunrise}")
+        print(f"Sunset: {sunset}")
+    else:
+        print("City not found.")
+
+def display_forecast(data):
+    if data["cod"] != "404":
+        city = data["city"]["name"]
+        print(f"5-Day Forecast for {city}:")
+        for forecast in data["list"]:
+            date = forecast["dt_txt"]
+            temperature = forecast["main"]["temp"]
+            weather_desc = forecast["weather"][0]["description"]
+            print(f"Date: {date}, Description: {weather_desc}, Temperature: {temperature}°C")
+    else:
+        print("City not found.")
+
+def main():
+    api_key = "YOUR_API_KEY"  # Replace with your OpenWeatherMap API key
+    city = input("Enter city name: ")
+
+    current_weather_data = get_weather(api_key, city)
+    forecast_data = get_forecast(api_key, city)
+
+    print("\nCurrent Weather:")
+    display_weather(current_weather_data)
+
+    print("\n5-Day Forecast:")
+    display_forecast(forecast_data)
+
+if __name__ == "__main__":
+    main()
